@@ -16,7 +16,7 @@ try{
  await page.waitForFunction(()=>document.querySelector('#title')?.textContent==='Documento de prueba');
  await page.waitForFunction(()=>document.querySelector('#sync').textContent.includes('Guardado en este dispositivo'));
  assert.equal(await page.evaluate(()=>typeof window.require),'undefined');assert.equal(await page.evaluate(()=>typeof window.famDesktop.open),'function');
- assert.equal(await page.locator('#countPeople').textContent(),'1');assert.equal(await page.locator('#desktopNav [data-view]').count(),9);assert.match(await page.locator('#documentName').textContent(),/fixture\.ftree/);
+ assert.equal(await page.locator('#countPeople').textContent(),'1');assert.equal(await page.locator('#desktopNav [data-view]').count(),8);assert.match(await page.locator('#documentName').textContent(),/fixture\.ftree/);
  await page.locator('#add').click();await page.locator('[name="name"]').fill('Otra persona ficticia');await page.locator('#personForm button[type=submit]').click();await page.waitForFunction(()=>document.querySelector('#countPeople').textContent==='2');
  await page.locator('#export').click();await page.waitForFunction(()=>document.querySelector('#toast').textContent.includes('Archivo guardado'));
  const stored=decodeFTree(await readFile(file));assert.equal(stored.people.length,2);

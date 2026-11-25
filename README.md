@@ -29,3 +29,6 @@ Mapa: costas de Natural Earth 1:110m (dominio público, https://www.naturalearth
 
 ## FamTree 4.4 · Bloque 5
 Historial y recuperación, copias .ftree protegidas por contraseña, presentación familiar y PDF gráfico; ajustes de contraste, texto grande y movimiento reducido. El cifrado cubre las copias exportadas, no IndexedDB ni el historial. Recuperar crea un proyecto independiente. Electron 28 y Builder 24 permanecen fijados para Catalina. El flujo de empaquetado de CI prueba un DMG Intel en macOS moderno; no sustituye una prueba física en Catalina.
+
+## 4.5 · Rediseño
+Inicio separado, recientes, interfaz negra/gris fija y tablero claro, fechas por componentes, selección múltiple Mayús+arrastre, Ctrl/⌘ A/C/V/D, vistas ascendentes con raíz útil, documentos con lectura y edición de transcripción. Se retira Lugares del menú principal; los registros históricos se conservan en Investigación. Portapapeles interno: personas y vínculos internos, no adjuntos compartidos. Formato v3 sin cambios.
