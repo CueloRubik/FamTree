@@ -6,8 +6,8 @@ const src={title:'Acta parroquial',reference:'Libro 2, folio 8',quote:'Transcrip
 const png='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRfkAAAAASUVORK5CYII=';
 const old={version:1,title:'Prueba',people:[{id:'a',name:'Ana'},{id:'b',name:'Benito'}],relations:[{type:'parent',from:'a',to:'b'}]};
 const rich={...old,positions:{a:{x:10,y:-45}},people:[{...old.people[0],aliases:['Anita','Ana María'],tags:['Rama materna'],occupation:'Docente',bio:'Biografía',bookmark:true,portrait:png,events:[{id:'e1',type:'baptism',date:'ca. 1880',place:'México',description:'Registro',certainty:'confirmed',sources:[src]}],claims:[{id:'c1',field:'birth',value:'1879',certainty:'probable',sources:[src]},{id:'c2',field:'birth',value:'1880',certainty:'contradictory',sources:[src]}]},old.people[1]],relations:[{...old.relations[0],kind:'adoptive',certainty:'confirmed',sources:[src]}]};
-test('reads original v1 data and writes version 2',()=>{const b=encodeFTree(old,{version:1});assert.equal(b[8],1);assert.deepEqual(decodeFTree(b),project(old));assert.equal(encodeFTree(decodeFTree(b))[8],2);});
-test('binary v2 retains all fields, image, claims, evidence and relation',()=>{const b=encodeFTree(rich);assert.equal(b[8],2);assert.deepEqual(decodeFTree(b),project(rich));});
+test('reads original v1 data and writes version 2',()=>{const b=encodeFTree(old,{version:1});assert.equal(b[8],1);assert.deepEqual(decodeFTree(b),project(old));assert.equal(encodeFTree(decodeFTree(b))[8],3);});
+test('binary v2 retains all fields, image, claims, evidence and relation',()=>{const b=encodeFTree(rich);assert.equal(b[8],3);assert.deepEqual(decodeFTree(b),project(rich));});
 test('cannot silently downgrade enhanced profile',()=>assert.throws(()=>encodeFTree(rich,{version:1}),/no admite/));
 test('search aliases and tags',()=>{assert.equal(searchPeople(project(rich),'anita materna')[0].id,'a');});
 test('remove unrelated person retains rich profile',()=>{assert.deepEqual(removePerson(project(rich),'b').people[0],project(rich).people[0]);});

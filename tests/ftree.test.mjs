@@ -9,7 +9,7 @@ test('binary round trip, unicode, coordinates',()=>{const d=project({...demo,tit
 test('empty binary',()=>assert.deepEqual(decodeFTree(encodeFTree(blank())),project(blank())));
 test('corrupt payload',()=>{const b=encodeFTree(demo);b[b.length-1]^=1;assert.throws(()=>decodeFTree(b),/dañado/);});
 test('truncated',()=>assert.throws(()=>decodeFTree(encodeFTree(demo).slice(0,-1))));
-test('future version',()=>{const b=encodeFTree(demo);b[8]=3;assert.throws(()=>decodeFTree(b),/Versión/);});
+test('future version',()=>{const b=encodeFTree(demo);b[8]=4;assert.throws(()=>decodeFTree(b),/Versión/);});
 test('trailing bytes',()=>{const b=encodeFTree(demo),c=new Uint8Array(b.length+1);c.set(b);assert.throws(()=>decodeFTree(c));});
 test('reject fake JSON',()=>assert.throws(()=>decodeFTree(new TextEncoder().encode(JSON.stringify(demo)))));
 test('reject bad coordinates',()=>assert.throws(()=>encodeFTree({...demo,positions:{a:{x:Infinity,y:0}}})));
