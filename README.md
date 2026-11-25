@@ -24,3 +24,5 @@ En Árbol, selecciona Orgánico, Ascendencia, Descendencia, Abanico o Familia in
 
 ## FamTree 4.3 · Bloque 4
 Biblioteca compartida de documentos con adjuntos, transcripciones y vínculos; tareas e hipótesis; lugares históricos con plano local; búsqueda avanzada; GEDCOM UTF-8 parcial y exportación de informe PDF nativa. En Revisión se accede también a estas herramientas. .ftree v3 conserva los nuevos datos y abre v1/v2; actualiza las tres plataformas. Máximo 8 MiB por adjunto y 32 MiB en conjunto. No hay cartografía histórica real ni intercambio GEDCOM completo.
+
+Mapa: costas de Natural Earth 1:110m (dominio público, https://www.naturalearthdata.com/about/terms-of-use/), empaquetadas localmente. No incluye calles ni fronteras históricas. El PDF de escritorio se crea con printToPDF; la web usa la función de impresión del navegador.
