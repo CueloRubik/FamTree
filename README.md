@@ -21,3 +21,6 @@ Consulta docs/PLAN-V4.md y docs/FTREE.md. npm test verifica el motor; npm run te
 
 ## FamTree 4.2 · Bloque 3
 En Árbol, selecciona Orgánico, Ascendencia, Descendencia, Abanico o Familia inmediata. Las vistas alternativas son de consulta, con persona central y profundidad configurable. Análisis permite calcular rutas de parentesco, detectar coincidencias, revisar y fusionar fichas con deshacer, comparar proyectos por ID y ver estadísticas. Revisión también da acceso a estas herramientas. Las ubicaciones se agrupan por texto; mapas y georreferenciación quedan para el bloque 4. El formato .ftree sigue siendo binario v2.
+
+## FamTree 4.3 · Bloque 4
+Biblioteca compartida de documentos con adjuntos, transcripciones y vínculos; tareas e hipótesis; lugares históricos con plano local; búsqueda avanzada; GEDCOM UTF-8 parcial y exportación de informe PDF nativa. En Revisión se accede también a estas herramientas. .ftree v3 conserva los nuevos datos y abre v1/v2; actualiza las tres plataformas. Máximo 8 MiB por adjunto y 32 MiB en conjunto. No hay cartografía histórica real ni intercambio GEDCOM completo.

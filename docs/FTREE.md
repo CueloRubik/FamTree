@@ -9,3 +9,10 @@ Ordinales desde cero:
 - event type: birth, death, baptism, marriage, divorce, residence, migration, occupation, burial, other.
 - claim field: name, birth, death, place, occupation, relationship, other.
 JSON portrait usa data:image/...;base64,...; binario guarda bytes sin base64. Eventos y afirmaciones alternativas no sustituyen automáticamente los datos principales. La certeza es una calificación humana. Límites: 64 MiB, 2000 personas, 6000 relaciones. Convertidor local: node tools/ftree.mjs encode entrada.json salida.ftree o decode entrada.ftree salida.json.
+
+## Versión binaria 3 (FamTree 4.3)
+La cabecera admite versiones 1, 2 y 3. La escritura predeterminada es 3; conserva toda la estructura v2 y añade al final tres listas. Las versiones anteriores no leen v3. La exportación a v1/v2 se rechaza si hay investigación ampliada.
+- Documentos: uint32 cantidad (máx 200); por registro cadenas id, title, reference, transcript, notes; uint32 referencias a personas + cadenas ID; uint8 tipo adjunto (0 ninguno, 1 PDF, 2 PNG, 3 JPEG, 4 WebP, 5 texto UTF-8), si presente cadena name, uint32 tamaño y bytes. Máx 8 MiB por adjunto, 32 MiB conjunto. No se ejecutan ni se muestran automáticamente adjuntos.
+- Tareas: uint32 cantidad (máx 500); cadenas id,title; uint8 kind (task,hypothesis), status (pending,progress,done), certainty (unknown,probable,confirmed,contradictory); cadenas description,due; lista IDs de personas y lista IDs de documentos.
+- Lugares: uint32 cantidad (máx 500); cadenas id,name,historical,period,notes; lista IDs de personas; uint8 coordenadas presentes, si presente float64 lat,lon.
+En JSON opcional research={documents,tasks,places}; attachment={type,name,data} usa base64 solo en JSON/memoria; el archivo guarda bytes. Se validan IDs, referencias y coordenadas. La fusión y eliminación de personas actualiza referencias. Mantiene el límite total de 64 MiB.

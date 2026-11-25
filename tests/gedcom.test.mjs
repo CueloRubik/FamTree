@@ -1,0 +1,5 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {importGEDCOM,exportGEDCOM} from '../js/gedcom.mjs';
+const text='0 HEAD\n1 GEDC\n2 VERS 5.5.1\n1 CHAR UTF-8\n0 @I1@ INDI\n1 NAME Ana /García/\n1 NOTE Nota\n2 CONT segunda línea\n0 @I2@ INDI\n1 NAME Beto /García/\n1 BIRT\n2 DATE ABT 1900\n2 PLAC México\n1 FAMC @F1@\n2 PEDI adopted\n0 @F1@ FAM\n1 HUSB @I1@\n1 CHIL @I2@\n0 TRLR\n';
+test('GEDCOM import utf8 dates and adoption',()=>{const {data,warnings}=importGEDCOM(text);assert.equal(data.people[0].name,'Ana García');assert.equal(data.people[0].notes,'Nota\nsegunda línea');assert.equal(data.relations[0].kind,'adoptive');assert.ok(warnings.length);});
+test('GEDCOM roundtrip without invented partner',()=>{const d=importGEDCOM(text).data,r=importGEDCOM(exportGEDCOM(d)).data;assert.equal(r.people.length,2);assert.equal(r.relations.length,1);assert.equal(r.relations[0].kind,'adoptive');});
+test('GEDCOM rejects invalid references and unsupported encoding',()=>{assert.throws(()=>importGEDCOM(text.replace('1 CHIL @I2@','1 CHIL @I9@')));assert.throws(()=>importGEDCOM(text.replace('UTF-8','ANSEL')));});

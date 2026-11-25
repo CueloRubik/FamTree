@@ -1,3 +1,4 @@
+import {cleanResearch,researchLimits,documentTypes,researchStates,hypothesisStates,bytesToBase64,base64ToBytes} from './research.mjs';
 import {validate} from './model.mjs';
 import {certaintyValues,kinds,eventTypes,claimFields,limits,hasExtensions,hasRelationExtensions} from './profile.mjs';
 export const MAX_BYTES=64*1024*1024;
@@ -7,7 +8,7 @@ const own=(o,k)=>Object.prototype.hasOwnProperty.call(o,k);
 export function project(raw){
  const d=validate(raw), entries=[];
  for(const p of d.people){const v=raw.positions&&own(raw.positions,p.id)?raw.positions[p.id]:null;if(v!=null){if(!Number.isFinite(v.x)||!Number.isFinite(v.y)||Math.abs(v.x)>1e7||Math.abs(v.y)>1e7)throw Error('Posición fuera del rango permitido.');entries.push([p.id,{x:v.x,y:v.y}]);}}
- return {...d,positions:Object.fromEntries(entries)};
+ return {...d,positions:Object.fromEntries(entries),...cleanResearch(raw.research,d.people)};
 }
 function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
 class Writer{
@@ -46,12 +47,26 @@ function readProfile(r){
  p.claims=Array.from({length:count(r,limits.claims)},()=>({id:r.str(80),field:readEnum(r,claimFields),value:r.str(1000),certainty:readEnum(r,certaintyValues),sources:readSources(r)}));return p;
 }
 
-export function encodeFTree(raw,{version=2}={}){
+
+function writeResearch(w,raw){const d=raw||{documents:[],tasks:[],places:[]};const refs=ids=>{w.u32(ids.length);for(const id of ids)w.str(id);};
+ w.u32(d.documents.length);for(const x of d.documents){for(const k of ['id','title','reference','transcript','notes'])w.str(x[k]);refs(x.people);w.u8(x.attachment?documentTypes.indexOf(x.attachment.type)+1:0);if(x.attachment){w.str(x.attachment.name);const bytes=base64ToBytes(x.attachment.data);w.u32(bytes.length);w.add(bytes);}}
+ w.u32(d.tasks.length);for(const x of d.tasks){w.str(x.id);w.str(x.title);w.u8(x.kind==='task'?0:1);w.u8(researchStates.indexOf(x.status));w.u8(hypothesisStates.indexOf(x.certainty));w.str(x.description);w.str(x.due);refs(x.people);refs(x.documents);}
+ w.u32(d.places.length);for(const x of d.places){for(const k of ['id','name','historical','period','notes'])w.str(x[k]);refs(x.people);w.u8(x.lat==null?0:1);if(x.lat!=null){w.f64(x.lat);w.f64(x.lon);}}
+}
+function readResearch(r){const refs=max=>Array.from({length:count(r,max)},()=>r.str(80));let total=0;
+ const documents=Array.from({length:count(r,researchLimits.documents)},()=>{const x={id:r.str(80),title:r.str(300),reference:r.str(1000),transcript:r.str(30000),notes:r.str(10000),people:refs(2000)},type=r.u8();if(type>documentTypes.length)throw Error('Tipo de adjunto inválido.');if(type){const name=r.str(180),n=count(r,researchLimits.attachment),start=r.take(n);total+=n;if(total>researchLimits.total)throw Error('Adjuntos demasiado grandes.');x.attachment={type:documentTypes[type-1],name,data:bytesToBase64(r.b.subarray(start,start+n))};}return x;});
+ const tasks=Array.from({length:count(r,researchLimits.tasks)},()=>({id:r.str(80),title:r.str(300),kind:readEnum(r,['task','hypothesis']),status:readEnum(r,researchStates),certainty:readEnum(r,hypothesisStates),description:r.str(10000),due:r.str(80),people:refs(2000),documents:refs(200)}));
+ const places=Array.from({length:count(r,researchLimits.places)},()=>{const x={id:r.str(80),name:r.str(160),historical:r.str(160),period:r.str(160),notes:r.str(5000),people:refs(2000)},flag=r.u8();if(flag>1)throw Error('Coordenada inválida.');if(flag){x.lat=r.f64();x.lon=r.f64();}return x;});return {documents,tasks,places};
+}
+
+export function encodeFTree(raw,{version=3}={}){
  const d=project(raw), w=new Writer(), indexes=new Map(d.people.map((p,i)=>[p.id,i]));
- if(![1,2].includes(version))throw Error('Versión de escritura desconocida.');if(version===1&&(d.people.some(hasExtensions)||d.relations.some(hasRelationExtensions)))throw Error('La versión 1 no admite expedientes ampliados.');
+ if(![1,2,3].includes(version))throw Error('Versión de escritura desconocida.');if(version===1&&(d.people.some(hasExtensions)||d.relations.some(hasRelationExtensions)))throw Error('La versión 1 no admite expedientes ampliados.');
+ if(version<3&&d.research)throw Error('La versión anterior no admite la investigación ampliada.');
  w.str(d.title);w.u32(d.people.length);w.u32(d.relations.length);
- for(const p of d.people){for(const f of fields)w.str(p[f]);w.u8(states.indexOf(p.status));w.u8(p.publish?1:0);const pos=own(d.positions,p.id)?d.positions[p.id]:null;w.u8(pos?1:0);if(pos){w.f64(pos.x);w.f64(pos.y);}if(version===2)writeProfile(w,p);}
- for(const r of d.relations){w.u8(r.type==='parent'?0:1);w.u32(indexes.get(r.from));w.u32(indexes.get(r.to));if(version===2){w.u8(kinds.indexOf(r.kind||'unknown'));w.u8(certaintyValues.indexOf(r.certainty||'unknown'));writeSources(w,r.sources||[]);}}
+ for(const p of d.people){for(const f of fields)w.str(p[f]);w.u8(states.indexOf(p.status));w.u8(p.publish?1:0);const pos=own(d.positions,p.id)?d.positions[p.id]:null;w.u8(pos?1:0);if(pos){w.f64(pos.x);w.f64(pos.y);}if(version>=2)writeProfile(w,p);}
+ for(const r of d.relations){w.u8(r.type==='parent'?0:1);w.u32(indexes.get(r.from));w.u32(indexes.get(r.to));if(version>=2){w.u8(kinds.indexOf(r.kind||'unknown'));w.u8(certaintyValues.indexOf(r.certainty||'unknown'));writeSources(w,r.sources||[]);}}
+ if(version>=3)writeResearch(w,d.research);
  const body=w.finish(),out=new Uint8Array(20+body.length),v=new DataView(out.buffer);
  out.set(magic);v.setUint16(8,version,true);v.setUint16(10,0,true);v.setUint32(12,body.length,true);v.setUint32(16,crc32(body),true);out.set(body,20);return out;
 }
@@ -59,13 +74,14 @@ export function decodeFTree(input){
  const bytes=input instanceof Uint8Array?input:new Uint8Array(input);
  if(bytes.length<20||bytes.length>MAX_BYTES||!magic.every((n,i)=>bytes[i]===n))throw Error('No es un archivo .ftree válido.');
  const h=new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
- const version=h.getUint16(8,true);if(![1,2].includes(version)||h.getUint16(10,true)!==0)throw Error('Versión o características .ftree no compatibles.');
+ const version=h.getUint16(8,true);if(![1,2,3].includes(version)||h.getUint16(10,true)!==0)throw Error('Versión o características .ftree no compatibles.');
  const body=bytes.subarray(20);if(h.getUint32(12,true)!==body.length||h.getUint32(16,true)!==crc32(body))throw Error('Archivo .ftree dañado (longitud o CRC incorrectos).');
  const r=new Reader(body),title=r.str(120),n=r.u32(),m=r.u32(),people=[],relations=[],positions=[];
  if(n>2000||m>6000)throw Error('Demasiados registros.');
  const limits=[80,160,80,80,160,1000,10000,5000];
- for(let i=0;i<n;i++){const p={};for(let j=0;j<fields.length;j++)p[fields[j]]=r.str(limits[j]);const s=r.u8(),pub=r.u8(),pos=r.u8();if(s>2||pub>1||pos>1)throw Error('Indicadores binarios inválidos.');p.status=states[s];p.publish=!!pub;if(pos)positions.push([p.id,{x:r.f64(),y:r.f64()}]);if(version===2)Object.assign(p,readProfile(r));people.push(p);}
- for(let i=0;i<m;i++){const t=r.u8(),a=r.u32(),b=r.u32();if(t>1||a>=n||b>=n)throw Error('Referencia binaria inválida.');const edge={type:t?'partner':'parent',from:people[a].id,to:people[b].id};if(version===2){edge.kind=readEnum(r,kinds);edge.certainty=readEnum(r,certaintyValues);edge.sources=readSources(r);}relations.push(edge);}
+ for(let i=0;i<n;i++){const p={};for(let j=0;j<fields.length;j++)p[fields[j]]=r.str(limits[j]);const s=r.u8(),pub=r.u8(),pos=r.u8();if(s>2||pub>1||pos>1)throw Error('Indicadores binarios inválidos.');p.status=states[s];p.publish=!!pub;if(pos)positions.push([p.id,{x:r.f64(),y:r.f64()}]);if(version>=2)Object.assign(p,readProfile(r));people.push(p);}
+ for(let i=0;i<m;i++){const t=r.u8(),a=r.u32(),b=r.u32();if(t>1||a>=n||b>=n)throw Error('Referencia binaria inválida.');const edge={type:t?'partner':'parent',from:people[a].id,to:people[b].id};if(version>=2){edge.kind=readEnum(r,kinds);edge.certainty=readEnum(r,certaintyValues);edge.sources=readSources(r);}relations.push(edge);}
+ const research=version>=3?readResearch(r):undefined;
  if(r.p!==body.length)throw Error('Datos adicionales inesperados.');
- return project({version:1,title,people,relations,positions:Object.fromEntries(positions)});
+ return project({version:1,title,people,relations,positions:Object.fromEntries(positions),research});
 }

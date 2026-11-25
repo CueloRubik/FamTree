@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {project,encodeFTree,decodeFTree} from '../js/ftree.mjs';import {remapResearch,advancedSearch,bytesToBase64} from '../js/research.mjs';import {mergePeople} from '../js/analysis.mjs';
+const base={version:1,title:'Prueba',people:[{id:'a',name:'Ana'},{id:'b',name:'Beto'}],relations:[]},research={documents:[{id:'d',title:'Acta',reference:'Folio 3',transcript:'Bautismo en 1890',notes:'',people:['a','b'],attachment:{name:'nota.txt',type:'text',data:bytesToBase64(new TextEncoder().encode('Texto histórico'))}}],tasks:[{id:'t',title:'Buscar acta',kind:'hypothesis',status:'progress',certainty:'probable',description:'Comparar',due:'1890',people:['b'],documents:['d']}],places:[{id:'l',name:'Ciudad',historical:'Villa antigua',period:'1890',notes:'',people:['b'],lat:20,lon:-100}]};
+const rich={...base,research};
+test('v3 binary document and research round trip',()=>{const b=encodeFTree(rich);assert.equal(b[8],3);assert.deepEqual(decodeFTree(b),project(rich));});
+test('read v2',()=>assert.deepEqual(decodeFTree(encodeFTree(base,{version:2})),project(base)));
+test('reject lossy downgrade',()=>assert.throws(()=>encodeFTree(rich,{version:2}),/no admite/));
+test('document links validated',()=>assert.throws(()=>project({...rich,research:{...research,documents:[{...research.documents[0],people:['bad']}]}})));
+test('document removal cannot leave task dangling',()=>assert.throws(()=>project({...rich,research:{...research,documents:[]}})));
+test('merge remaps shared sources and tasks',()=>{const m=mergePeople(rich,'a','b');assert.deepEqual(m.research.documents[0].people,['a']);assert.deepEqual(m.research.tasks[0].people,['a']);assert.deepEqual(m.research.places[0].people,['a']);});
+test('delete remaps references',()=>assert.deepEqual(remapResearch(project(rich),'b').tasks[0].people,[]));
+test('advanced search includes transcript and historical place',()=>{assert.equal(advancedSearch(project(rich),{text:'bautismo',place:'villa antigua'}).length,1);});
+test('invalid coordinates rejected',()=>assert.throws(()=>project({...rich,research:{...research,places:[{...research.places[0],lat:91}]}})));
+test('reject mismatched attachment',()=>assert.throws(()=>project({...rich,research:{...research,documents:[{...research.documents[0],attachment:{...research.documents[0].attachment,type:'pdf'}}]}})));
