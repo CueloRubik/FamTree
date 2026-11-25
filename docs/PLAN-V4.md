@@ -10,3 +10,5 @@ Tres ramas: Development (web y GitHub Pages), Electron-Mac (Catalina), Electron-
 5. Robustez e integración: cifrado opcional, copias/versiones/recuperación, presentación, personalización final, accesibilidad, rendimiento, pruebas de ida y vuelta y compilaciones de las tres plataformas.
 
 La web mantiene las operaciones básicas de lectura, edición y archivos, sin cargar dependencias Electron. Los módulos de escritorio pueden ser más completos; si la web abre un formato futuro, debe conservar los datos que no muestra o rechazar de forma explícita una versión que no entiende. No hay sincronización de proyectos ni publicación pública. No se promete un plazo sin medir ejecución y pruebas.
+
+Bloque 2 (4.1): expedientes ampliados, fotos, etiquetas, eventos, evidencias y parentescos. Binario v2; lectura v1. Pendiente biblioteca de documentos compartidos (bloque 4).

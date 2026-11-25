@@ -1,3 +1,4 @@
+import {cleanProfile,cleanRelation} from './profile.mjs';
 function blank(){return {version:1,title:"Mi árbol familiar",people:[],relations:[]}}
 
 function safeLink(v){return typeof v==="string"&&/^https:\/\/(?:www\.)?familysearch\.org\/(?:[a-z]{2}\/)?(?:tree\/person\/(?:details|about|sources|memories|timeline)\/[A-Za-z0-9-]+|ark:\/61903\/[A-Za-z0-9:._/-]+)\/?$/.test(v)?v:""}
@@ -9,7 +10,7 @@ function validate(raw){
  const people=raw.people.map(p=>{
  if(!p||typeof p.id!=="string"||!/^[A-Za-z0-9_-]{1,80}$/.test(p.id)||!str(p.name,160))throw Error("Persona sin ID o nombre válido.");
  const familysearch=str(p.familysearch,1000);if(familysearch&&!safeLink(familysearch))throw Error("Enlace FamilySearch inválido: "+p.name);
- return {id:p.id,name:str(p.name,160),birth:str(p.birth,80),death:str(p.death,80),place:str(p.place,160),status:["living","deceased","unknown"].includes(p.status)?p.status:"unknown",publish:p.status==="deceased"&&p.publish===true,familysearch:safeLink(familysearch),notes:str(p.notes,10000),sources:str(p.sources,5000)};
+ return {id:p.id,name:str(p.name,160),birth:str(p.birth,80),death:str(p.death,80),place:str(p.place,160),status:["living","deceased","unknown"].includes(p.status)?p.status:"unknown",publish:p.status==="deceased"&&p.publish===true,familysearch:safeLink(familysearch),notes:str(p.notes,10000),sources:str(p.sources,5000),...cleanProfile(p)};
  });
  const ids=new Set(people.map(p=>p.id));if(ids.size!==people.length)throw Error("IDs duplicados.");
  const seen=new Set(),children=new Map(people.map(p=>[p.id,[]])),indegree=new Map(people.map(p=>[p.id,0]));
@@ -17,7 +18,7 @@ function validate(raw){
  if(!r||!["parent","partner"].includes(r.type)||!ids.has(r.from)||!ids.has(r.to)||r.from===r.to)throw Error("Relación inválida.");
  let {from,to,type}=r;if(type==="partner"&&from>to)[from,to]=[to,from];
  const key=type+":"+from+":"+to;if(seen.has(key))throw Error("Relación duplicada.");seen.add(key);
- if(type==="parent"){children.get(from).push(to);indegree.set(to,indegree.get(to)+1)}return {type,from,to};
+ if(type==="parent"){children.get(from).push(to);indegree.set(to,indegree.get(to)+1)}return {type,from,to,...cleanRelation(r)};
  });
  const q=people.filter(p=>indegree.get(p.id)===0).map(p=>p.id);
  for(let i=0;i<q.length;i++)for(const c of children.get(q[i])){indegree.set(c,indegree.get(c)-1);if(!indegree.get(c))q.push(c)}
@@ -33,7 +34,7 @@ function related(raw,id,direction){
  const out=new Set([id]),queue=[id];for(let i=0;i<queue.length;i++)for(const n of adj.get(queue[i])||[])if(!out.has(n)){out.add(n);queue.push(n)}return out;
 }
 
-function searchPeople(raw,query){const norm=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();const words=norm(query).trim().split(/\s+/);return raw.people.filter(p=>words.every(w=>norm([p.name,p.birth,p.death,p.place].join(" ")).includes(w)))}
+function searchPeople(raw,query){const norm=s=>String(s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();const words=norm(query).trim().split(/\s+/);return raw.people.filter(p=>words.every(w=>norm([p.name,p.birth,p.death,p.place,p.occupation,...(p.aliases||[]),...(p.tags||[])].join(" ")).includes(w)))}
 
 function layout(raw,only=null){
  const people=raw.people.filter(p=>!only||only.has(p.id)),ids=new Set(people.map(p=>p.id)),edges=raw.relations.filter(r=>ids.has(r.from)&&ids.has(r.to)),parents=new Map(people.map(p=>[p.id,[]])),children=new Map(people.map(p=>[p.id,[]])),partners=new Map(people.map(p=>[p.id,[]]));
