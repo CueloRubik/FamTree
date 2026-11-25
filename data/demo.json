@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "title": "Familia de ejemplo · ficticia",
+  "people": [
+    {
+      "id": "a",
+      "name": "Elena del Bosque",
+      "birth": "1881",
+      "death": "1956",
+      "place": "Pueblo de ejemplo",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "b",
+      "name": "Julián del Valle",
+      "birth": "1878",
+      "death": "1951",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "c",
+      "name": "Mara del Valle",
+      "birth": "1908",
+      "death": "1987",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "d",
+      "name": "Tomás del Río",
+      "birth": "1906",
+      "death": "1980",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "e",
+      "name": "Clara del Valle",
+      "birth": "1912",
+      "death": "1991",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "f",
+      "name": "Inés del Río",
+      "birth": "1935",
+      "death": "2008",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "g",
+      "name": "Mateo del Río",
+      "birth": "1938",
+      "death": "2010",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "h",
+      "name": "Luz del Prado",
+      "birth": "1940",
+      "death": "2012",
+      "place": "",
+      "status": "deceased",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "i",
+      "name": "Alba del Prado",
+      "birth": "1964",
+      "death": "",
+      "place": "",
+      "status": "unknown",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    },
+    {
+      "id": "j",
+      "name": "Simón del Prado",
+      "birth": "1968",
+      "death": "",
+      "place": "",
+      "status": "unknown",
+      "publish": false,
+      "familysearch": "",
+      "notes": "",
+      "sources": ""
+    }
+  ],
+  "relations": [
+    {
+      "type": "partner",
+      "from": "a",
+      "to": "b"
+    },
+    {
+      "type": "parent",
+      "from": "a",
+      "to": "c"
+    },
+    {
+      "type": "parent",
+      "from": "b",
+      "to": "c"
+    },
+    {
+      "type": "parent",
+      "from": "a",
+      "to": "e"
+    },
+    {
+      "type": "parent",
+      "from": "b",
+      "to": "e"
+    },
+    {
+      "type": "partner",
+      "from": "c",
+      "to": "d"
+    },
+    {
+      "type": "parent",
+      "from": "c",
+      "to": "f"
+    },
+    {
+      "type": "parent",
+      "from": "d",
+      "to": "f"
+    },
+    {
+      "type": "parent",
+      "from": "c",
+      "to": "g"
+    },
+    {
+      "type": "parent",
+      "from": "d",
+      "to": "g"
+    },
+    {
+      "type": "partner",
+      "from": "g",
+      "to": "h"
+    },
+    {
+      "type": "parent",
+      "from": "g",
+      "to": "i"
+    },
+    {
+      "type": "parent",
+      "from": "h",
+      "to": "i"
+    },
+    {
+      "type": "parent",
+      "from": "g",
+      "to": "j"
+    },
+    {
+      "type": "parent",
+      "from": "h",
+      "to": "j"
+    }
+  ]
+}
