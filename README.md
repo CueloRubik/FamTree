@@ -1,31 +1,18 @@
-# FamTree 1.0
+# FamTree 2.0
 
-Archivo genealógico interactivo en español, sin frameworks ni dependencias externas de ejecución. Estética de herbario histórico; ramas SVG, fichas HTML y motor de relaciones en JavaScript.
+Editor genealógico en español, JavaScript nativo, sin dependencias de ejecución. Desarrollo en esta rama; main conserva las notas.
 
-## Inicio
-Desde esta rama: `python3 -m http.server 8000` y abrir http://localhost:8000. No abrir index.html mediante file://, porque el navegador puede bloquear módulos y JSON. Node 18 o posterior: `npm test`.
+## Uso
+- Abre la página publicada: https://cuelorubik.github.io/FamTree/
+- Para desarrollo: python3 -m http.server 8000; abre http://localhost:8000. Node 18+: npm test.
+- Proyectos (icono carpeta): crea, abre, renombra, duplica o elimina árboles locales. Cada cambio se guarda en IndexedDB; la última sesión privada se reabre en el mismo perfil. El indicador inferior informa del guardado. El archivo público y el ejemplo son de solo lectura; puedes hacer una copia en Proyectos.
+- El tablero utiliza coordenadas independientes: arrastra el fondo, mueve círculos en un proyecto privado y sus ramas se redibujan en tiempo real; usa la rueda o botones para zoom, encuadra todo y vuelve a ordenar automáticamente. Los descendientes crecen hacia arriba. Menús y ficha son ocultables.
+- Crea personas y descendientes/progenitores directamente, edita datos, vincula parejas, consulta FamilySearch, busca, filtra ascendencia/descendencia, abre directorio y cronología; deshacer y rehacer también revierten movimientos.
+- Exporta .ftree como copia binaria y abre archivos .ftree o JSON de v1 sin reemplazar otros proyectos. Ver docs/FTREE.md y docs/DATA.md para intercambio.
 
-## Flujo de trabajo
-- El archivo público se consulta sin editar. Si está vacío, la página abre un ejemplo claramente ficticio.
-- En Taller privado se pueden crear/editar fichas y vínculos, deshacer, rehacer, importar y exportar. Los datos privados viven en memoria de la pestaña, no se guardan en el servidor ni en localStorage. Descarga una copia privada antes de cerrar. No subirla a GitHub.
-- FamilySearch: enlaces opcionales de perfil o fuente ARK. No se accede a la cuenta ni se sincroniza por API. Algunas páginas requieren sesión.
-- Para publicar, un adulto revisa registros y marca solamente personas cuyo fallecimiento está comprobado. Preparar publicación genera tree.json, elimina notas/fuentes privadas, excluye registros vivos y desconocidos y sus relaciones. Revisar todo el contenido, incluyendo campos de texto y enlaces, antes de subirlo. GitHub conserva historial.
-- Reemplazar exclusivamente data/tree.json de Development con la copia pública revisada. La página vuelve a consultar ese archivo cada 60 s; la disponibilidad de la versión nueva depende de GitHub Pages.
-- Nunca colocar credenciales, archivos privados, nombres o datos de familiares vivos en ninguna rama pública. No hay autenticación ni base de datos remota. Para trabajo privado persistente, conservar el JSON en el equipo de la familia; no usar esta página pública para datos que requieran confidencialidad fuerte, pues su código puede cambiar.
+## Privacidad y publicación
+Los proyectos están en IndexedDB de ese navegador, no en el servidor. No están cifrados. El navegador puede eliminar sus datos y el código servido por un sitio público puede cambiar: usa copias locales y un perfil de confianza; no almacenes información confidencial en equipos compartidos. No hay sincronización entre dispositivos, autenticación ni colaboración en tiempo real. Las escrituras detectan cambios concurrentes de otra pestaña. Si falla el guardado, exporta una copia y vuelve a abrirla.
 
-## Publicación
-Settings → Pages → Deploy from a branch → Development → /(root) → Save.
-URL esperada: https://cuelorubik.github.io/FamTree/. El conector de GitHub no configura Pages. La rama main conserva solo el README de orientación.
+El archivo público sigue siendo data/tree.json. Preparar publicación exporta solo fichas de fallecidos marcadas como revisadas, excluye notas, fuentes, coordenadas e IDs privados. Un adulto debe revisar toda la información antes de publicar. No subas archivos privados, datos de vivos ni credenciales a GitHub. GitHub conserva historial. FamilySearch es un enlace externo, no una integración API.
 
-## Estructura
-- index.html: interfaz, formularios y accesibilidad.
-- css/app.css: sistema visual, temas y adaptación móvil.
-- assets/: iconos SVG originales.
-- js/model.mjs: validación, relaciones, búsqueda, proyección pública y distribución.
-- js/app.mjs: interacción, dibujo, editor, navegación e intercambio.
-- data/tree.json: única colección pública real, inicialmente vacía.
-- data/demo.json: ejemplo inventado, nunca mezclar con registros reales.
-- tests/model.test.mjs: pruebas unitarias. Ver documentación del formato en docs/DATA.md.
-
-## Límites conocidos
-No hay importación directa Excel/GEDCOM, colaboración simultánea, autenticación ni integración API FamilySearch. La distribución por generaciones admite parejas y varias relaciones parentales; no pretende reproducir todos los formatos genealógicos especializados. Las fechas son texto flexible y la cronología ordena por primer año reconocible.
+Settings → Pages → Deploy from a branch → Development → /(root). Las comprobaciones de GitHub Actions incluyen tests unitarios y Chromium. No hay GEDCOM ni Excel, fotos, sincronización remota o cifrado en esta versión.

@@ -1,4 +1,6 @@
-# Modelo de datos FamTree v1
+# Modelo de intercambio JSON FamTree v1
+
+FamTree 2.0 conserva este formato para importar archivos anteriores y publicar el árbol revisado. El formato privado nativo es binario: consulta [FTREE.md](FTREE.md). El conversor local permite generar archivos .ftree a partir del JSON de investigación sin subir información privada.
 
 Archivo JSON UTF-8, objeto con version (1), title, people y relations. Los IDs son cadenas de 1–80 caracteres ASCII alfanuméricos, guion o guion bajo, únicas y estables dentro del archivo. Las relaciones usan IDs, no nombres.
 
