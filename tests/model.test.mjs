@@ -21,3 +21,6 @@ test("good URL",()=>assert.ok((()=>!!safeLink("https://www.familysearch.org/tree
 test("private public reject",()=>assert.ok((()=>{try{validatePublic(demo);return false}catch{return true}})()));
 test("partner duplicate",()=>assert.ok((()=>{try{validate({...demo,relations:[...demo.relations,{type:"partner",from:"b",to:"a"}]});return false}catch{return true}})()));
 test('public data',()=>validatePublic(JSON.parse(readFileSync(new URL('../data/tree.json',import.meta.url),'utf8'))));
+
+test('partners align when consistent',()=>{const l=layout(demo);assert.equal(l.positions.get('c').depth,l.positions.get('d').depth);assert.equal(l.positions.get('g').depth,l.positions.get('h').depth)});
+test('parent depth increases even with contradictory partner links',()=>{const d=validate({...demo,relations:[...demo.relations,{type:'partner',from:'a',to:'i'}]});const l=layout(d);for(const r of d.relations.filter(r=>r.type==='parent'))assert.ok(l.positions.get(r.from).depth<l.positions.get(r.to).depth)});

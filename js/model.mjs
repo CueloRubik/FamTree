@@ -49,8 +49,19 @@ function searchPeople(raw,query){const norm=s=>String(s).normalize("NFD").replac
 function layout(raw,only=null){
  const people=raw.people.filter(p=>!only||only.has(p.id)),ids=new Set(people.map(p=>p.id)),edges=raw.relations.filter(r=>ids.has(r.from)&&ids.has(r.to)),parents=new Map(people.map(p=>[p.id,[]])),children=new Map(people.map(p=>[p.id,[]])),partners=new Map(people.map(p=>[p.id,[]]));
  for(const r of edges){if(r.type==="parent"){parents.get(r.to).push(r.from);children.get(r.from).push(r.to)}else{partners.get(r.from).push(r.to);partners.get(r.to).push(r.from)}}
- const depth=new Map(),pending=new Map(people.map(p=>[p.id,parents.get(p.id).length])),q=people.filter(p=>!pending.get(p.id)).map(p=>p.id);
- q.forEach(id=>depth.set(id,0));for(let i=0;i<q.length;i++){const id=q[i];for(const c of children.get(id)){depth.set(c,Math.max(depth.get(c)||0,depth.get(id)+1));pending.set(c,pending.get(c)-1);if(!pending.get(c))q.push(c)}}
+ // Align partners into generation groups when doing so cannot create a cycle.
+ const group=new Map(people.map(p=>[p.id,p.id]));
+ const root=id=>{let r=id;while(group.get(r)!==r)r=group.get(r);while(group.get(id)!==id){const n=group.get(id);group.set(id,r);id=n}return r};
+ const parentEdges=edges.filter(r=>r.type==="parent");
+ const graph=()=>{const adj=new Map();for(const p of people)adj.set(root(p.id),new Set());for(const r of parentEdges){const a=root(r.from),b=root(r.to);if(a!==b)adj.get(a).add(b)}return adj};
+ const reaches=(adj,a,b)=>{const visited=new Set([a]),q=[a];for(let i=0;i<q.length;i++){if(q[i]===b)return true;for(const c of adj.get(q[i])||[])if(!visited.has(c)){visited.add(c);q.push(c)}}return false};
+ let adj=graph();
+ for(const r of edges)if(r.type==="partner"){const a=root(r.from),b=root(r.to);if(a!==b&&!reaches(adj,a,b)&&!reaches(adj,b,a)){group.set(b,a);adj=graph()}}
+ const gd=new Map(),pending=new Map([...adj.keys()].map(id=>[id,0]));
+ for(const children of adj.values())for(const c of children)pending.set(c,pending.get(c)+1);
+ const q=[...adj.keys()].filter(id=>!pending.get(id));q.forEach(id=>gd.set(id,0));
+ for(let i=0;i<q.length;i++){const id=q[i];for(const c of adj.get(id)){gd.set(c,Math.max(gd.get(c)||0,gd.get(id)+1));pending.set(c,pending.get(c)-1);if(!pending.get(c))q.push(c)}}
+ const depth=new Map(people.map(p=>[p.id,gd.get(root(p.id))||0]));
  const rows=new Map();for(const p of people){const d=depth.get(p.id)||0;if(!rows.has(d))rows.set(d,[]);rows.get(d).push(p)}
  const positions=new Map(),width=Math.max(680,...Array.from(rows.values(),row=>row.length*218+120));
  for(const [d,row] of [...rows].sort((a,b)=>a[0]-b[0])){
