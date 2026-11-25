@@ -12,3 +12,5 @@ Tres ramas: Development (web y GitHub Pages), Electron-Mac (Catalina), Electron-
 La web mantiene las operaciones básicas de lectura, edición y archivos, sin cargar dependencias Electron. Los módulos de escritorio pueden ser más completos; si la web abre un formato futuro, debe conservar los datos que no muestra o rechazar de forma explícita una versión que no entiende. No hay sincronización de proyectos ni publicación pública. No se promete un plazo sin medir ejecución y pruebas.
 
 Bloque 2 (4.1): expedientes ampliados, fotos, etiquetas, eventos, evidencias y parentescos. Binario v2; lectura v1. Pendiente biblioteca de documentos compartidos (bloque 4).
+
+Bloque 3 (4.2): vistas orgánica, ascendencia, descendencia, abanico y familia inmediata; parentesco por ruta registrada, candidatos a duplicados, fusión revisada y reversible, comparación por ID, estadísticas y agrupación de lugares con acontecimientos. El formato binario sigue siendo v2. Las vistas alternativas no cambian posiciones manuales. Comparación no identifica automáticamente árboles independientes; mapas históricos quedan en bloque 4.
