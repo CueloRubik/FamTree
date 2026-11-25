@@ -1,0 +1,31 @@
+name: FamTree macOS packaging
+on:
+  push:
+    branches: [Electron-Mac]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm install --no-audit --no-fund
+      - run: npm run build:mac
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Inspect packaged document association
+        run: |
+          find dist -name '*.app' -maxdepth 3
+          test -f dist/mac/FamTree.app/Contents/Resources/document.icns
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleDocumentTypes' dist/mac/FamTree.app/Contents/Info.plist
+          test -n "$(find dist -name '*.dmg' -print -quit)"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FamTree-mac-intel
+          path: dist/*.dmg
+          if-no-files-found: error
