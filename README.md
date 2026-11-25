@@ -23,3 +23,6 @@ En Árbol, selecciona Orgánico, Ascendencia, Descendencia, Abanico o Familia in
 
 ## FamTree 4.3 · Bloque 4
 Documentos compartidos, adjuntos, transcripciones, tareas e hipótesis, lugares históricos con plano local, búsqueda avanzada, GEDCOM parcial y PDF nativo. .ftree v3 abre v1/v2; las versiones antiguas no abren v3. Actualiza las tres plataformas. Adjuntos 8 MiB, total 32 MiB. No incluye mapas históricos reales ni GEDCOM completo.
+
+## FamTree 4.4 · Bloque 5
+Historial, recuperación, copias .ftree protegidas por contraseña, presentación y PDF gráfico, ajustes de contraste, texto grande y movimiento reducido. El cifrado cubre copias exportadas, no la base local. Recuperación independiente. CI genera instalador NSIS x64; no equivale a probar la instalación en el equipo final.

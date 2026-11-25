@@ -1,6 +1,6 @@
 const {app,BrowserWindow,Menu,dialog,ipcMain,protocol,session,shell,nativeImage}=require('electron');
 const fs=require('node:fs/promises'),syncFs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto'),{execFile}=require('node:child_process'),{promisify}=require('node:util');
-const exec=promisify(execFile),ROOT=path.join(__dirname,'..'),LIMIT=64*1024*1024;
+const exec=promisify(execFile),ROOT=path.join(__dirname,'..'),LIMIT=64*1024*1024+64;
 const scheme='famtree',origin=scheme+'://app',installed='/Applications/FamTree.app';
 protocol.registerSchemesAsPrivileged([{scheme,privileges:{standard:true,secure:true,supportFetchAPI:true,codeCache:true}}]);
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
@@ -57,9 +57,9 @@ function createWindow(){ready=false;win=new BrowserWindow({width:1280,height:820
  win.webContents.setWindowOpenHandler(({url})=>{try{const u=new URL(url);if(u.protocol==='https:'&&['www.familysearch.org','familysearch.org'].includes(u.hostname)&&!u.username&&!u.password&&!u.port)shell.openExternal(u.href).catch(()=>{});}catch{}return {action:'deny'};});
  win.once('ready-to-show',()=>win.show());win.on('closed',()=>{win=null;ready=false;});win.loadURL(origin+'/index.html');
 }
-function createMenu(){const file={label:'Archivo',submenu:[{label:'Nuevo árbol',accelerator:'CmdOrCtrl+N',click:()=>sendCommand('new')},{label:'Abrir…',accelerator:'CmdOrCtrl+O',click:()=>sendCommand('open')},{label:'Guardar archivo',accelerator:'CmdOrCtrl+S',click:()=>sendCommand('save')},{label:'Guardar como…',accelerator:'CmdOrCtrl+Shift+S',click:()=>sendCommand('saveAs')},{type:'separator'},{role:'close',label:'Cerrar ventana'}]};
+function createMenu(){const file={label:'Archivo',submenu:[{label:'Nuevo árbol',accelerator:'CmdOrCtrl+N',click:()=>sendCommand('new')},{label:'Abrir…',accelerator:'CmdOrCtrl+O',click:()=>sendCommand('open')},{label:'Guardar archivo',accelerator:'CmdOrCtrl+S',click:()=>sendCommand('save')},{label:'Historial y recuperación',click:()=>sendCommand('history')},{label:'Exportar copia protegida',click:()=>sendCommand('protect')},{label:'Guardar como…',accelerator:'CmdOrCtrl+Shift+S',click:()=>sendCommand('saveAs')},{type:'separator'},{role:'close',label:'Cerrar ventana'}]};
  const edit={label:'Edición',submenu:[{label:'Deshacer en el árbol',click:()=>sendCommand('undo')},{label:'Rehacer en el árbol',click:()=>sendCommand('redo')},{role:'undo',label:'Deshacer texto'},{role:'redo',label:'Rehacer texto'},{type:'separator'},{role:'cut',label:'Cortar'},{role:'copy',label:'Copiar'},{role:'paste',label:'Pegar'},{role:'selectAll',label:'Seleccionar todo'}]};
  const tools={label:'Herramientas',submenu:[{label:'Revisión',click:()=>sendCommand('review')},{label:'Configuración',click:()=>sendCommand('settings')}]};
- const view={label:'Vista',submenu:[{label:'Ampliar área de trabajo',click:()=>sendCommand('focus')},{label:'Encuadrar árbol',click:()=>sendCommand('fit')},{label:'Buscar personas',accelerator:'CmdOrCtrl+F',click:()=>sendCommand('search')},{role:'togglefullscreen',label:'Pantalla completa'}]};
+ const view={label:'Vista',submenu:[{label:'Ampliar área de trabajo',click:()=>sendCommand('focus')},{label:'Presentación familiar',click:()=>sendCommand('present')},{label:'Encuadrar árbol',click:()=>sendCommand('fit')},{label:'Buscar personas',accelerator:'CmdOrCtrl+F',click:()=>sendCommand('search')},{role:'togglefullscreen',label:'Pantalla completa'}]};
  Menu.setApplicationMenu(Menu.buildFromTemplate([...(process.platform==='darwin'?[{label:'FamTree',submenu:[{role:'about',label:'Acerca de FamTree'},{type:'separator'},{role:'hide',label:'Ocultar FamTree'},{role:'quit',label:'Salir de FamTree'}]}]:[]),file,edit,view,tools]));
 }

@@ -1,0 +1,30 @@
+name: FamTree Windows packaging
+on:
+  push:
+    branches: [Electron-Windows]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm.cmd install --no-audit --no-fund
+      - run: npm.cmd run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Check installer
+        shell: pwsh
+        run: |
+          if (!(Get-ChildItem dist -Filter *.exe)) { throw 'Missing installer' }
+          if (!(Test-Path 'build/document.ico')) { throw 'Missing document icon' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FamTree-windows-x64
+          path: dist/*.exe
+          if-no-files-found: error
