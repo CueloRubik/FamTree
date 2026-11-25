@@ -1,0 +1,16 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {project,encodeFTree,decodeFTree} from '../js/ftree.mjs';import {generations,immediate,fan,kinship,duplicates,mergePeople,compareProjects,placeGroups,statistics} from '../js/analysis.mjs';
+const p=(id,name,extra={})=>({id,name,...extra}),r=(from,to,extra={})=>({type:'parent',from,to,...extra}),d=project({version:1,title:'Familia ficticia',people:[p('a','Ana'),p('b','Beto'),p('c','Clara'),p('d','Diana'),p('e','Eva'),p('f','Fede')],relations:[r('a','b'),r('a','c'),r('b','d'),r('c','e'),{type:'partner',from:'d',to:'f'}]});
+test('ancestor rows',()=>assert.deepEqual(generations(d,'d','ancestors'),[['d'],['b'],['a']]));
+test('descendant rows',()=>assert.deepEqual(generations(d,'a','descendants'),[['a'],['b','c'],['d','e']]));
+test('immediate siblings and partners',()=>{assert.deepEqual(immediate(d,'b')[2].ids,['c']);assert.deepEqual(immediate(d,'d')[3].ids,['f']);});
+test('fan depth and limits',()=>{assert.equal(fan(d,'d').nodes.length,3);assert.equal(fan(d,'d',1).truncated,true);assert.equal(fan(d,'d',4,1).truncated,true);});
+test('kinship cousins, grandparent and partner',()=>{assert.equal(kinship(d,'d','e').label,'Primo/a de grado 1');assert.equal(kinship(d,'d','a').label,'Abuelo o abuela');assert.equal(kinship(d,'d','f').label,'Pareja');});
+test('no connection and same person',()=>{assert.equal(kinship({...d,relations:[]},'a','b'),null);assert.equal(kinship(d,'a','a').label,'Misma persona');});
+const rich=project({...d,people:[...d.people,p('z','Ána',{birth:'1890',notes:'Nota B',tags:['Etiqueta'],claims:[{id:'q',field:'birth',value:'1889',certainty:'probable',sources:[]} ]})],relations:[...d.relations,r('z','b',{kind:'adoptive'})]});
+test('duplicate by accent-normalized name',()=>assert.ok(duplicates(rich).pairs.some(x=>x.a==='a'&&x.b==='z')));
+test('merge transfers relationship and rich data',()=>{const m=mergePeople(rich,'a','z');assert.equal(m.people.length,6);assert.equal(m.relations.find(x=>x.from==='a'&&x.to==='b').kind,'adoptive');assert.equal(m.people[0].claims[0].value,'1889');assert.equal(m.people[0].notes,'Nota B');assert.deepEqual(decodeFTree(encodeFTree(m)),m);});
+test('merge blocks direct relation',()=>assert.throws(()=>mergePeople(d,'a','b'),/vínculo directo/));
+test('merge blocks indirect cycle',()=>assert.throws(()=>mergePeople(d,'a','d'),/antepasado/));
+test('merge preserves conflicting date as evidence',()=>{const x=project({...rich,people:rich.people.map(p=>p.id==='a'?{...p,birth:'1880'}:p)});const m=mergePeople(x,'a','z');assert.equal(m.people[0].birth,'1880');assert.ok(m.people[0].claims.some(c=>c.value==='1890'&&c.certainty==='contradictory'));});
+test('compare identifies matched changes and missing IDs',()=>{const c=compareProjects(d,rich);assert.equal(c.onlyRight[0].id,'z');assert.equal(c.linksAdded.length,1);assert.equal(c.matched.length,6);});
+test('places include events, count people only once',()=>{const x=project({...d,people:d.people.map(p=>p.id==='a'?{...p,place:'México',events:[{id:'x',type:'residence',place:'Mexico',certainty:'unknown',sources:[]}]}:p)});assert.equal(placeGroups(x)[0].people.length,1);assert.equal(placeGroups(x)[0].events.length,1);assert.equal(statistics(x).events,1);});
