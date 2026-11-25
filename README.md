@@ -26,3 +26,6 @@ Documentos compartidos, adjuntos, transcripciones, tareas e hipótesis, lugares 
 
 ## FamTree 4.4 · Bloque 5
 Historial, recuperación, copias .ftree protegidas por contraseña, presentación y PDF gráfico, ajustes de contraste, texto grande y movimiento reducido. El cifrado cubre copias exportadas, no la base local. Recuperación independiente. CI genera instalador NSIS x64; no equivale a probar la instalación en el equipo final.
+
+## 4.5 · Rediseño
+Inicio separado, UI negra/gris fija, tablero claro, fechas por componentes, selección múltiple, Ctrl/⌘ A/C/V/D, raíz útil de ascendencia y abanico, editor de documentos. Lugares permanece en Investigación y no en el menú principal. Portapapeles interno de fichas y vínculos internos. Formato v3 sin cambios.
