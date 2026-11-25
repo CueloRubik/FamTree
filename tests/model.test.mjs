@@ -1,4 +1,4 @@
-import {blank,safeLink,validate,publicCopy,validatePublic,removePerson,related,searchPeople,layout} from '../js/model.mjs';
+import {blank,safeLink,validate,removePerson,related,searchPeople,layout} from '../js/model.mjs';
 import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -11,19 +11,15 @@ test("descendants",()=>assert.ok((()=>related(demo,"a","descendants").size===7)(
 test("search accents",()=>assert.ok((()=>searchPeople(demo,"julian").length===1)()));
 test("no overlap",()=>assert.ok((()=>new Set([...layout(demo).positions.values()].map(p=>p.x+","+p.y)).size===10)()));
 test("remove links",()=>assert.ok((()=>removePerson(demo,"a").relations.every(r=>r.from!=="a"&&r.to!=="a"))()));
-test("privacy default",()=>assert.ok((()=>publicCopy(demo).people.length===0)()));
-test("privacy filter",()=>assert.ok((()=>{const d=JSON.parse(JSON.stringify(demo));d.people.forEach(p=>{p.publish=true;p.notes="secret";p.sources="private"});const pub=publicCopy(d);return pub.people.length===8&&pub.people.every(p=>!p.notes&&!p.sources&&p.status==="deceased")&&pub.relations.every(r=>pub.people.some(p=>p.id===r.from)&&pub.people.some(p=>p.id===r.to))})()));
 test("cycle",()=>assert.ok((()=>{try{validate({...demo,relations:[...demo.relations,{type:"parent",from:"i",to:"a"}]});return false}catch{return true}})()));
 test("duplicate",()=>assert.ok((()=>{try{validate({...demo,people:[...demo.people,demo.people[0]]});return false}catch{return true}})()));
 test("dangling",()=>assert.ok((()=>{try{validate({...demo,relations:[...demo.relations,{type:"parent",from:"a",to:"missing"}]});return false}catch{return true}})()));
 test("bad URL",()=>assert.ok((()=>!safeLink("javascript:alert(1)")&&!safeLink("https://familysearch.org.evil.com/tree/person/details/ABCD-123")&&!safeLink("https://familysearch.org/tree/person/details/ABCD-123?token=abc"))()));
 test("good URL",()=>assert.ok((()=>!!safeLink("https://www.familysearch.org/tree/person/details/ABCD-123"))()));
-test("private public reject",()=>assert.ok((()=>{try{validatePublic(demo);return false}catch{return true}})()));
 test("partner duplicate",()=>assert.ok((()=>{try{validate({...demo,relations:[...demo.relations,{type:"partner",from:"b",to:"a"}]});return false}catch{return true}})()));
-test('public data',()=>validatePublic(JSON.parse(readFileSync(new URL('../data/tree.json',import.meta.url),'utf8'))));
 
 test('partners align when consistent',()=>{const l=layout(demo);assert.equal(l.positions.get('c').depth,l.positions.get('d').depth);assert.equal(l.positions.get('g').depth,l.positions.get('h').depth)});
 test('parent depth increases even with contradictory partner links',()=>{const d=validate({...demo,relations:[...demo.relations,{type:'partner',from:'a',to:'i'}]});const l=layout(d);for(const r of d.relations.filter(r=>r.type==='parent'))assert.ok(l.positions.get(r.from).depth<l.positions.get(r.to).depth)});
 
-test('public unknown fields rejected',()=>{const p=publicCopy({...demo,people:demo.people.map(x=>({...x,publish:true}))});p.people[0].privateField='secret';assert.throws(()=>validatePublic(p))});
-test('public whitespace notes rejected',()=>{const p=publicCopy({...demo,people:demo.people.map(x=>({...x,publish:true}))});p.people[0].notes=' ';assert.throws(()=>validatePublic(p))});
+
+test('personal records keep notes regardless of life status',()=>{const d=validate({...blank(),people:[{id:'a',name:'Ejemplo',status:'living',notes:'Una nota',sources:'Una referencia'}]});assert.equal(d.people[0].notes,'Una nota');assert.equal(d.people[0].sources,'Una referencia');});

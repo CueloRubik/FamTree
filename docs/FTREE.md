@@ -1,5 +1,5 @@
 # FamTree .ftree, especificación binaria 1
-La extensión recomendada desde FamTree 3 es `.famtree`; `.ftree` sigue siendo compatible con exactamente los mismos bytes. El archivo privado es una secuencia binaria Little Endian, no contiene un documento JSON. Extensión .ftree; MIME application/octet-stream. No está cifrado ni autenticado: CRC32 detecta corrupción accidental, no manipulaciones deliberadas. Conserva copias fuera del navegador y no subas archivos privados a GitHub.
+La extensión oficial desde FamTree 4 es `.ftree`; los antiguos `.famtree` se abren sin conversión porque contienen exactamente los mismos bytes. El archivo privado es una secuencia binaria Little Endian, no contiene un documento JSON. Extensión .ftree; MIME application/octet-stream. No está cifrado ni autenticado: CRC32 detecta corrupción accidental, no manipulaciones deliberadas. Conserva copias fuera del navegador y conserva una copia independiente.
 
 ## Cabecera de 20 bytes
 | Offset | Tipo | Significado |
@@ -20,4 +20,4 @@ Node.js 18 o posterior:
 - node tools/ftree.mjs encode privado.json familia.ftree
 - node tools/ftree.mjs decode familia.ftree privado.json
 
-El conversor no sobrescribe archivos existentes. El esquema de intercambio JSON anterior se describe en DATA.md; puede incluir un objeto positions con claves de ID y valores {x,y}. La aplicación sigue importando JSON de v1. Los asistentes deben trabajar con datos ficticios o copias privadas revisadas por adultos; no subir datos privados a repositorios. El JSON público de data/tree.json sigue siendo compatible y deliberadamente separado del formato privado.
+El conversor no sobrescribe archivos existentes. El esquema de intercambio JSON anterior se describe en DATA.md; puede incluir un objeto positions con claves de ID y valores {x,y}. La aplicación sigue importando JSON de v1. Los asistentes pueden trabajar con el esquema JSON local y convertirlo a .ftree. No existe publicación de árboles en FamTree 4.

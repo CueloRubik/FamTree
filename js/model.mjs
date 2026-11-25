@@ -25,19 +25,6 @@ function validate(raw){
  return {version:1,title:str(raw.title,120)||"Mi árbol familiar",people,relations};
 }
 
-function publicCopy(raw){
- const d=validate(raw),selected=d.people.filter(p=>p.status==="deceased"&&p.publish),ids=new Set(selected.map(p=>p.id)),map=new Map(selected.map((p,i)=>[p.id,"p"+(i+1)]));
- return validate({version:1,title:"Archivo genealógico",people:selected.map(p=>({id:map.get(p.id),name:p.name,birth:p.birth,death:p.death,place:p.place,status:"deceased",publish:true,familysearch:p.familysearch})),relations:d.relations.filter(r=>ids.has(r.from)&&ids.has(r.to)).map(r=>({type:r.type,from:map.get(r.from),to:map.get(r.to)}))});
-}
-
-function validatePublic(raw){
- const d=validate(raw);
- const allowedTop=new Set(["version","title","people","relations"]),allowedPerson=new Set(["id","name","birth","death","place","status","publish","familysearch","notes","sources"]),allowedRelation=new Set(["type","from","to"]);
- if(Object.keys(raw).some(k=>!allowedTop.has(k))||raw.people.some(p=>Object.keys(p).some(k=>!allowedPerson.has(k))||p.notes||p.sources)||raw.relations.some(r=>Object.keys(r).some(k=>!allowedRelation.has(k))))throw Error("Campos privados o desconocidos en archivo público.");
- if(d.people.some(p=>p.status!=="deceased"||!p.publish||p.notes||p.sources))throw Error("El archivo público contiene registros no autorizados o notas privadas.");
- return d;
-}
-
 function removePerson(raw,id){return validate({...raw,people:raw.people.filter(p=>p.id!==id),relations:raw.relations.filter(r=>r.from!==id&&r.to!==id)})}
 
 function related(raw,id,direction){
@@ -76,4 +63,4 @@ function layout(raw,only=null){
  return {people,edges,positions,width,height:Math.max(400,240+Math.max(0,...rows.keys())*176),generations:rows.size};
 }
 
-export {blank,safeLink,validate,publicCopy,validatePublic,removePerson,related,searchPeople,layout};
+export {blank,safeLink,validate,removePerson,related,searchPeople,layout};

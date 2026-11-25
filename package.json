@@ -1,22 +1,21 @@
 {
   "name": "famtree",
   "productName": "FamTree",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "main": "desktop/main.cjs",
   "scripts": {
     "prestart": "node tools/icons.cjs",
     "start": "electron .",
-    "start:web": "python3 -m http.server 8000",
     "test": "node --test tests/*.test.mjs",
-    "build:mac": "node tools/icons.cjs && electron-builder --mac dmg --x64",
-    "build:mac:dir": "node tools/icons.cjs && electron-builder --mac dir --x64",
-    "build:mac:universal": "node tools/icons.cjs && electron-builder --mac dmg --universal"
+    "test:icons": "node tools/icons.cjs && node tests/icons.mjs",
+    "build:win": "node tools/icons.cjs && electron-builder --win nsis --x64",
+    "build:win:dir": "node tools/icons.cjs && electron-builder --win dir --x64"
   },
   "devDependencies": {
-    "electron": "28.3.3",
-    "electron-builder": "24.13.3"
+    "electron": "45.5.0",
+    "electron-builder": "26.18.0"
   },
   "build": {
     "appId": "com.cuelorubik.famtree",
@@ -27,59 +26,51 @@
       "css/**",
       "js/**",
       "assets/**",
-      "data/**",
       "desktop/**",
       "build/icon.png",
-      "package.json"
+      "package.json",
+      "data/demo.json"
     ],
     "directories": {
       "output": "dist",
       "buildResources": "build"
     },
-    "mac": {
-      "category": "public.app-category.productivity",
-      "icon": "build/icon.icns",
-      "minimumSystemVersion": "10.15.0",
+    "publish": null,
+    "win": {
+      "icon": "build/icon.ico",
       "target": [
-        "dmg"
-      ],
-      "extendInfo": {
-        "UTExportedTypeDeclarations": [
-          {
-            "UTTypeIdentifier": "com.cuelorubik.famtree.document",
-            "UTTypeDescription": "Árbol genealógico FamTree",
-            "UTTypeConformsTo": [
-              "public.data",
-              "public.content"
-            ],
-            "UTTypeTagSpecification": {
-              "public.filename-extension": [
-                "famtree",
-                "ftree"
-              ],
-              "public.mime-type": "application/x-famtree"
-            }
-          }
-        ],
-        "CFBundleDocumentTypes": [
-          {
-            "CFBundleTypeName": "Árbol genealógico FamTree",
-            "CFBundleTypeRole": "Editor",
-            "LSHandlerRank": "Owner",
-            "LSItemContentTypes": [
-              "com.cuelorubik.famtree.document"
-            ],
-            "CFBundleTypeExtensions": [
-              "famtree",
-              "ftree"
-            ],
-            "CFBundleTypeIconFile": "icon.icns"
-          }
-        ]
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "fileAssociations": [
+      {
+        "ext": "ftree",
+        "name": "Árbol genealógico FamTree",
+        "description": "Documento FamTree",
+        "icon": "document.ico",
+        "role": "Editor"
       },
-      "identity": null
-    }
+      {
+        "ext": "famtree",
+        "name": "Árbol genealógico FamTree (anterior)",
+        "description": "Documento FamTree anterior",
+        "icon": "document.ico",
+        "role": "Editor"
+      }
+    ]
   },
-  "description": "Editor de árboles genealógicos para web y macOS",
+  "description": "FamTree · editor genealógico personal",
   "author": "CueloRubik"
 }
