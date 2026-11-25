@@ -1,0 +1,9 @@
+const fs=require('node:fs'),zlib=require('node:zlib'),path=require('node:path');
+const dir=path.join(__dirname,'..','build');fs.mkdirSync(dir,{recursive:true});
+function crc(b){let c=0xffffffff;for(const x of b){c^=x;for(let i=0;i<8;i++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
+function chunk(t,b){const a=Buffer.alloc(b.length+12);a.writeUInt32BE(b.length);a.write(t,4);b.copy(a,8);a.writeUInt32BE(crc(a.subarray(4,-4)),a.length-4);return a;}
+function png(n){const raw=Buffer.alloc(n*(n*4+1));const seg=(x,y,a,b,c,d)=>{const t=Math.max(0,Math.min(1,((x-a)*(c-a)+(y-b)*(d-b))/((c-a)**2+(d-b)**2)));return Math.hypot(x-a-t*(c-a),y-b-t*(d-b));};const leaves=[[.50,.27,.105],[.28,.42,.092],[.72,.42,.092],[.39,.58,.075],[.61,.58,.075]];
+ for(let j=0;j<n;j++)for(let i=0;i<n;i++){const x=(i+.5)/n,y=(j+.5)/n,k=j*(n*4+1)+1+i*4;const r=.185,dx=Math.max(Math.abs(x-.5)-(.42-r),0),dy=Math.max(Math.abs(y-.5)-(.42-r),0);if(Math.hypot(dx,dy)>r)continue;let col=[240,242,232,255];if(seg(x,y,.5,.81,.5,.30)<.016||seg(x,y,.5,.64,.28,.42)<.012||seg(x,y,.5,.64,.72,.42)<.012||seg(x,y,.5,.72,.39,.58)<.009||seg(x,y,.5,.72,.61,.58)<.009)col=[118,81,52,255];for(const [a,b,c] of leaves)if(Math.hypot(x-a,y-b)<c)col=[52,113,69,255];raw.set(col,k);}
+ const ih=Buffer.alloc(13);ih.writeUInt32BE(n);ih.writeUInt32BE(n,4);ih[8]=8;ih[9]=6;return Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ih),chunk('IDAT',zlib.deflateSync(raw)),chunk('IEND',Buffer.alloc(0))]);}
+const p=png(512);fs.writeFileSync(path.join(dir,'icon.png'),p);
+const entries=[];for(const [type,size] of [['icp4',16],['icp5',32],['icp6',64],['ic07',128],['ic08',256],['ic09',512],['ic10',1024]]){const b=size===512?p:png(size),h=Buffer.alloc(8);h.write(type);h.writeUInt32BE(b.length+8,4);entries.push(h,b);}const all=Buffer.concat(entries),h=Buffer.alloc(8);h.write('icns');h.writeUInt32BE(all.length+8,4);fs.writeFileSync(path.join(dir,'icon.icns'),Buffer.concat([h,all]));

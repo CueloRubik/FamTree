@@ -8,7 +8,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,14 +17,19 @@ jobs:
       - name: Syntax and unit tests
         run: |
           node --check js/app.mjs
-          node --check js/model.mjs
+          node --check desktop/main.cjs
+          node --check desktop/preload.cjs
           npm test
-      - name: Install browser test tooling
+          node tools/icons.cjs
+      - name: Install Electron and browser test tooling
         run: |
           npm install --no-save --package-lock=false playwright@1.56.1
           npx playwright install --with-deps chromium
-      - name: Test application in Chromium
+      - name: Test web application
         run: |
           python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/famtree-server.log 2>&1 &
           for attempt in {1..20}; do curl -fsS http://127.0.0.1:8000/ >/dev/null && break; sleep 1; done
           node tests/browser.mjs
+      - name: Test desktop application
+        if: always()
+        run: xvfb-run -a node tests/desktop.mjs

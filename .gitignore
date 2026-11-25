@@ -4,3 +4,8 @@ private/
 playwright-report/
 test-results/
 .DS_Store
+
+*.famtree
+*.ftree
+dist/
+build/

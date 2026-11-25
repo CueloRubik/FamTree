@@ -1,5 +1,5 @@
 # FamTree .ftree, especificación binaria 1
-El archivo privado es una secuencia binaria Little Endian, no contiene un documento JSON. Extensión .ftree; MIME application/octet-stream. No está cifrado ni autenticado: CRC32 detecta corrupción accidental, no manipulaciones deliberadas. Conserva copias fuera del navegador y no subas archivos privados a GitHub.
+La extensión recomendada desde FamTree 3 es `.famtree`; `.ftree` sigue siendo compatible con exactamente los mismos bytes. El archivo privado es una secuencia binaria Little Endian, no contiene un documento JSON. Extensión .ftree; MIME application/octet-stream. No está cifrado ni autenticado: CRC32 detecta corrupción accidental, no manipulaciones deliberadas. Conserva copias fuera del navegador y no subas archivos privados a GitHub.
 
 ## Cabecera de 20 bytes
 | Offset | Tipo | Significado |
