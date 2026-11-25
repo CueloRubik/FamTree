@@ -18,3 +18,5 @@ Bloque 3 (4.2): vistas orgánica, ascendencia, descendencia, abanico y familia i
 Bloque 4 (4.3): documentos compartidos con adjuntos, transcripciones, tareas e hipótesis, lugares históricos y plano local de coordenadas, búsqueda avanzada, intercambio parcial GEDCOM UTF-8 e informe imprimible/PDF. Binario v3 con lectura v1/v2. El plano no contiene fronteras históricas; GEDCOM es un subconjunto y no sustituye a .ftree. No hay servicios externos ni publicación.
 
 Cartografía base: Natural Earth 1:110m de dominio público, distribuida como trazados SVG locales (blob 04811d72fff2701ec67587e30ad8942675b511e3). No se representan fronteras históricas ni se transmiten coordenadas. Prueba de generación de PDF mediante Chromium.
+
+Bloque 5 (4.4): exportación protegida AES-256-GCM, historial local de versiones (5 por proyecto, 128 MiB global), recuperación independiente, presentación de solo lectura y PDF gráfico, accesibilidad, CRC optimizado y cache de generaciones. Las copias protegidas no cifran IndexedDB. Pruebas nativas de empaquetado separadas de regresión Linux. La compatibilidad Catalina real requiere equipo físico.

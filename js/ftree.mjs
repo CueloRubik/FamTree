@@ -10,7 +10,8 @@ export function project(raw){
  for(const p of d.people){const v=raw.positions&&own(raw.positions,p.id)?raw.positions[p.id]:null;if(v!=null){if(!Number.isFinite(v.x)||!Number.isFinite(v.y)||Math.abs(v.x)>1e7||Math.abs(v.y)>1e7)throw Error('Posición fuera del rango permitido.');entries.push([p.id,{x:v.x,y:v.y}]);}}
  return {...d,positions:Object.fromEntries(entries),...cleanResearch(raw.research,d.people)};
 }
-function crc32(bytes){let c=0xffffffff;for(const b of bytes){c^=b;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);}return (c^0xffffffff)>>>0;}
+const crcTable=Uint32Array.from({length:256},(_,i)=>{let c=i;for(let j=0;j<8;j++)c=(c>>>1)^((c&1)?0xedb88320:0);return c>>>0;});
+function crc32(bytes){let c=0xffffffff;for(const b of bytes)c=(c>>>8)^crcTable[(c^b)&255];return (c^0xffffffff)>>>0;}
 class Writer{
  constructor(){this.chunks=[];this.size=0;}
  add(b){this.size+=b.length;if(this.size>MAX_BYTES-20)throw Error('El proyecto supera 64 MiB.');this.chunks.push(b);}

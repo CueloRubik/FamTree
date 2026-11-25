@@ -1,0 +1,6 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {protectTree,unprotectTree,isProtected} from '../js/protection.mjs';import {project,decodeFTree} from '../js/ftree.mjs';import {choosePruned,BACKUP_LIMIT} from '../js/projects.mjs';
+const d=project({version:1,title:'Familia ficticia',people:[{id:'a',name:'Ana'}],relations:[],research:{documents:[{id:'d',title:'Registro',people:['a'],transcript:'Texto de prueba'}]}});
+test('encrypted file authenticates all project data',async()=>{const pass='contraseña de prueba larga',a=await protectTree(d,pass),b=await protectTree(d,pass);assert.ok(isProtected(a));assert.notDeepEqual(a,b);assert.deepEqual(await unprotectTree(a,pass),d);assert.throws(()=>decodeFTree(a));await assert.rejects(unprotectTree(a,'contraseña incorrecta'));a[a.length-1]^=1;await assert.rejects(unprotectTree(a,pass));});
+test('reject short password',async()=>{await assert.rejects(protectTree(d,'123'));});
+test('snapshot retention keeps recent five per project',()=>{const rows=Array.from({length:8},(_,i)=>({id:'a',key:'a:'+i,revision:i,updated:i,size:10}));assert.deepEqual(choosePruned(rows),['a:2','a:1','a:0']);});
+test('snapshot global capacity',()=>{const rows=[{id:'a',key:'a',revision:1,updated:1,size:BACKUP_LIMIT},{id:'b',key:'b',revision:1,updated:2,size:10}];assert.deepEqual(choosePruned(rows),['a']);});
