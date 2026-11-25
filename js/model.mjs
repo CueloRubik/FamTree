@@ -32,6 +32,8 @@ function publicCopy(raw){
 
 function validatePublic(raw){
  const d=validate(raw);
+ const allowedTop=new Set(["version","title","people","relations"]),allowedPerson=new Set(["id","name","birth","death","place","status","publish","familysearch","notes","sources"]),allowedRelation=new Set(["type","from","to"]);
+ if(Object.keys(raw).some(k=>!allowedTop.has(k))||raw.people.some(p=>Object.keys(p).some(k=>!allowedPerson.has(k))||p.notes||p.sources)||raw.relations.some(r=>Object.keys(r).some(k=>!allowedRelation.has(k))))throw Error("Campos privados o desconocidos en archivo público.");
  if(d.people.some(p=>p.status!=="deceased"||!p.publish||p.notes||p.sources))throw Error("El archivo público contiene registros no autorizados o notas privadas.");
  return d;
 }

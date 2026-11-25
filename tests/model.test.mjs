@@ -24,3 +24,6 @@ test('public data',()=>validatePublic(JSON.parse(readFileSync(new URL('../data/t
 
 test('partners align when consistent',()=>{const l=layout(demo);assert.equal(l.positions.get('c').depth,l.positions.get('d').depth);assert.equal(l.positions.get('g').depth,l.positions.get('h').depth)});
 test('parent depth increases even with contradictory partner links',()=>{const d=validate({...demo,relations:[...demo.relations,{type:'partner',from:'a',to:'i'}]});const l=layout(d);for(const r of d.relations.filter(r=>r.type==='parent'))assert.ok(l.positions.get(r.from).depth<l.positions.get(r.to).depth)});
+
+test('public unknown fields rejected',()=>{const p=publicCopy({...demo,people:demo.people.map(x=>({...x,publish:true}))});p.people[0].privateField='secret';assert.throws(()=>validatePublic(p))});
+test('public whitespace notes rejected',()=>{const p=publicCopy({...demo,people:demo.people.map(x=>({...x,publish:true}))});p.people[0].notes=' ';assert.throws(()=>validatePublic(p))});

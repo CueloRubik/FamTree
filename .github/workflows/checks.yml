@@ -1,0 +1,29 @@
+name: FamTree checks
+on:
+  push:
+    branches: [Development]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and unit tests
+        run: |
+          node --check js/app.mjs
+          node --check js/model.mjs
+          npm test
+      - name: Install browser test tooling
+        run: |
+          npm install --no-save --package-lock=false playwright@1.51.1
+          npx playwright install --with-deps chromium
+      - name: Test application in Chromium
+        run: |
+          python3 -m http.server 8000 --bind 127.0.0.1 > /tmp/famtree-server.log 2>&1 &
+          node tests/browser.mjs

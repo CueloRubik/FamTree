@@ -17,7 +17,7 @@ function person(id){return data().people.find(p=>p.id===id)}
 function download(d,filename){const url=URL.createObjectURL(new Blob([JSON.stringify(d,null,2)+'\n'],{type:'application/json'}));const a=make('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500)}
 function setMode(next,automatic=false){
  if(next==='local'&&!localData)localData=mode==='public'?validate(publicData):blank();
- mode=next;if(!automatic)autoDemo=false;selected=null;$('query').value='';$('scope').value='all';view='tree';render(true);
+ mode=next;if(!automatic)autoDemo=false;selected=null;$('query').value='';$('scope').value='all';view='tree';render(true);if(next==='local')$('sync').textContent='Taller privado: los cambios no se publican automáticamente.';else $('sync').textContent='Archivo público: comprobación cada minuto.';
 }
 function commit(next){if(mode!=='local')return;const validated=validate(next);history.push(localData);if(history.length>60)history.shift();future=[];localData=validated;dirty=true;if(!person(selected))selected=null;render(false)}
 function undo(){if(mode!=='local'||!history.length)return;future.push(localData);localData=history.pop();dirty=true;if(!person(selected))selected=null;render(false)}
@@ -34,7 +34,7 @@ function refreshControls(){
  for(const n of document.querySelectorAll('[data-view]')){const active=n.dataset.view===view;n.classList.toggle('active',active);if(active)n.setAttribute('aria-current','page');else n.removeAttribute('aria-current')}
  for(const v of ['tree','directory','timeline'])$(v+'View').hidden=v!==view;
 }
-function render(fit=false){refreshControls();renderResults();if(view==='tree')renderTree(fit);else if(view==='directory')renderDirectory();else renderTimeline();renderDetail()}
+function render(fit=false){const focused=document.activeElement?.dataset?.person;refreshControls();renderResults();if(view==='tree')renderTree(fit);else if(view==='directory')renderDirectory();else renderTimeline();renderDetail();if(focused&&view==='tree'){const node=[...$('nodes').children].find(n=>n.dataset.person===focused);if(node)node.focus({preventScroll:true})}}
 function selectPerson(id,center=false){if(!person(id))return;selected=id;render(false);if(center&&view==='tree')centerPerson(id);if(window.innerWidth<=900&&center)$('detail').scrollIntoView({block:'nearest',behavior:'auto'})}
 function matchSet(){return new Set(searchPeople(data(),$('query').value).map(p=>p.id))}
 function renderResults(){
@@ -116,12 +116,12 @@ viewport.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button
 viewport.addEventListener('pointermove',e=>{if(drag){viewport.scrollLeft=drag.l+drag.x-e.clientX;viewport.scrollTop=drag.t+drag.y-e.clientY}});
 for(const ev of ['pointerup','pointercancel','lostpointercapture'])viewport.addEventListener(ev,()=>{drag=null;viewport.classList.remove('drag')});
 viewport.addEventListener('wheel',e=>{if(e.ctrlKey||e.metaKey){e.preventDefault();applyZoom(zoom*(e.deltaY<0?1.12:1/1.12))}},{passive:false});
-window.addEventListener('keydown',e=>{if(e.target.closest('input,textarea,select,dialog')||mode!=='local')return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}});
+window.addEventListener('keydown',e=>{if(e.target.closest?.('input,textarea,select,dialog')||mode!=='local')return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();e.shiftKey?redo():undo()}});
 async function readJSON(path){const r=await fetch(path,{cache:'no-cache',credentials:'same-origin',referrerPolicy:'no-referrer'});if(!r.ok)throw Error('HTTP '+r.status);return r.json()}
 async function refreshPublic(){
  if(refreshing)return;refreshing=true;
- try{const next=validatePublic(await readJSON('data/tree.json'));const changed=JSON.stringify(next)!==JSON.stringify(publicData);publicData=next;
- if(autoDemo&&publicData.people.length){autoDemo=false;setMode('public',true)}else if(changed&&mode==='public'){if(!person(selected)){selected=null;$('scope').value='all'}render(false)}
+ try{const next=validatePublic(await readJSON('data/tree.json'));const changed=JSON.stringify(next)!==JSON.stringify(publicData),oldSelected=mode==='public'?person(selected):null;publicData=next;
+ if(autoDemo&&publicData.people.length){autoDemo=false;setMode('public',true)}else if(changed&&mode==='public'){if(!person(selected)||!oldSelected||person(selected).name!==oldSelected.name){selected=null;$('scope').value='all'}render(false)}
  $('sync').textContent=mode==='local'?'Taller privado: los cambios no se publican automáticamente.':'Archivo público comprobado a las '+new Date().toLocaleTimeString('es-MX')+' · actualización cada minuto.';
  }catch(err){$('sync').textContent='No se pudo actualizar el archivo público. Se conserva la última versión disponible.';console.warn('FamTree: actualización pública fallida',err)}
  finally{refreshing=false}
