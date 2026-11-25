@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {encodeFTree,decodeFTree,project} from '../js/ftree.mjs';
 import {boardLayout,branchPath,branchShape,fitCamera} from '../js/board.mjs';
-import {blank,publicCopy} from '../js/model.mjs';
+import {blank} from '../js/model.mjs';
 const demo=JSON.parse(readFileSync(new URL('../data/demo.json',import.meta.url),'utf8'));
 test('binary round trip, unicode, coordinates',()=>{const d=project({...demo,title:'Árbol 🌳',positions:{a:{x:-301.5,y:22.25}},people:demo.people.map((p,i)=>i===0?{...p,notes:'Ñ 🦊'}:p)});const b=encodeFTree(d);assert.equal(new TextDecoder().decode(b.slice(0,5)),'FTREE');assert.deepEqual(decodeFTree(b),d);});
 test('empty binary',()=>assert.deepEqual(decodeFTree(encodeFTree(blank())),project(blank())));
@@ -13,10 +13,11 @@ test('future version',()=>{const b=encodeFTree(demo);b[8]=2;assert.throws(()=>de
 test('trailing bytes',()=>{const b=encodeFTree(demo),c=new Uint8Array(b.length+1);c.set(b);assert.throws(()=>decodeFTree(c));});
 test('reject fake JSON',()=>assert.throws(()=>decodeFTree(new TextEncoder().encode(JSON.stringify(demo)))));
 test('reject bad coordinates',()=>assert.throws(()=>encodeFTree({...demo,positions:{a:{x:Infinity,y:0}}})));
-test('private coordinates never published',()=>assert.equal('positions' in publicCopy({...demo,positions:{a:{x:1,y:2}}}),false));
 test('descendants grow upward',()=>{const g=boardLayout(demo);for(const r of g.edges.filter(r=>r.type==='parent'))assert.ok(g.positions.get(r.from).y>g.positions.get(r.to).y);});
 test('manual position preserved with scope',()=>{const d={...demo,positions:{a:{x:-444,y:88}}};assert.equal(boardLayout(d,new Set(['a'])).positions.get('a').x,-444);});
 test('paths and camera finite',()=>{const g=boardLayout(demo),c=fitCamera(g.positions,800,600);assert.ok(c.z>0);assert.match(branchPath({x:0,y:0},{x:100,y:-200}),/^M .* C /);});
 
 test('tapered wood paths are closed',()=>assert.match(branchShape({x:0,y:0},{x:90,y:-200},10),/^M .* Z$/));
 test('automatic nodes avoid a fixed position',()=>{const base=boardLayout(demo),a=base.positions.get('a'),b=base.positions.get('b');const g=boardLayout({...demo,positions:{a:{x:b.x,y:b.y}}});assert.equal(g.positions.get('a').x,b.x);assert.ok(Math.abs(g.positions.get('a').x-g.positions.get('b').x)>=174);});
+
+test('legacy publish bit round trips without a publication feature',()=>{const p={...blank(),people:[{id:'a',name:'Ejemplo',status:'deceased',publish:true,notes:'Nota'}]};const d=decodeFTree(encodeFTree(p));assert.equal(d.people[0].publish,true);assert.equal(d.people[0].notes,'Nota');});
