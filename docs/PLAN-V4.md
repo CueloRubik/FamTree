@@ -16,3 +16,5 @@ Bloque 2 (4.1): expedientes ampliados, fotos, etiquetas, eventos, evidencias y p
 Bloque 3 (4.2): vistas orgánica, ascendencia, descendencia, abanico y familia inmediata; parentesco por ruta registrada, candidatos a duplicados, fusión revisada y reversible, comparación por ID, estadísticas y agrupación de lugares con acontecimientos. El formato binario sigue siendo v2. Las vistas alternativas no cambian posiciones manuales. Comparación no identifica automáticamente árboles independientes; mapas históricos quedan en bloque 4.
 
 Bloque 4 (4.3): documentos compartidos con adjuntos, transcripciones, tareas e hipótesis, lugares históricos y plano local de coordenadas, búsqueda avanzada, intercambio parcial GEDCOM UTF-8 e informe imprimible/PDF. Binario v3 con lectura v1/v2. El plano no contiene fronteras históricas; GEDCOM es un subconjunto y no sustituye a .ftree. No hay servicios externos ni publicación.
+
+Cartografía base: Natural Earth 1:110m de dominio público, distribuida como trazados SVG locales (blob 04811d72fff2701ec67587e30ad8942675b511e3). No se representan fronteras históricas ni se transmiten coordenadas. Prueba de generación de PDF mediante Chromium.
