@@ -17,3 +17,6 @@ Mapa: costas de Natural Earth 1:110m (dominio público, https://www.naturalearth
 
 ## FamTree 4.4 · Bloque 5
 Proyectos ofrece Historial y recuperación y Exportar copia protegida. Las versiones anteriores quedan disponibles hasta cinco por proyecto (128 MiB global); recuperar crea una copia independiente. El cifrado AES-256-GCM protege la copia exportada, no la base local ni el historial. Al abrirla se pide contraseña; no hay recuperación de contraseñas. Presentar muestra las cinco vistas en modo consulta e imprime el árbol en PDF. Los archivos normales siguen en v3. Conserva respaldos externos.
+
+## 4.5 · Espacio de trabajo
+Inicio separado de la edición, recientes por apertura, interfaz oscura fija y tablero claro, fechas por componentes, selección de grupo con Mayús+arrastre, Ctrl/⌘ A/C/V/D, vistas ascendentes con raíz útil, lectura/edición de transcripciones. Lugares históricos conservados en investigación; sin geocodificación automática ni cartografía detallada. El portapapeles de fichas es interno a la sesión y copia los vínculos internos, no los documentos compartidos. Formato v3 sin cambios.
